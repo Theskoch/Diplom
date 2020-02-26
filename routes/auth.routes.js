@@ -1,100 +1,52 @@
 const {Router} = require('express')
-const bcrypt = require('bcryptjs')
 const config = require('config')
-const jwt = require('jsonwebtoken')
-const {check, yalidationResult} = require('express-validator')
-const User = require('../models/User')
 const router = Router()
 
-// /api/auth/register
-router.post('/register',
+let test_base ={
+    "user": "loh",
+    "name": "andrei",
+    "triger": true    
+};
 
-[
-    check('email', 'you email dermo').isEmail(),
-    check('password', 'you password dermo').isLength({min:1})
-],
 
-async (req, res) => {
+// /api/register
 
+//http://localhost:5000/api/test_send_data
+
+router.get('/test_send_data',function (req, res){
     try{
-        const errors = validationResult(req)     
-        
-        if (!errors.isEmpty()){
-            return res.status(400).json({
-                errors: errors.array(),
-                massage: 'you idiot'
-            })
-        }
-
-        const {email, password} = req.body
-
-        const candidate = await User.findOne({email})
-
-        if (candidate){
-            return res.status(400).json({massage: 'user is dafain'})
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 12)
-        const user = new User({ email, password: hashedPassword })
-        
-        await user.save()
-
-        res.status(201).json({ massage:'user complite' })
-
-
-    }catch(e){
+        res.send(test_base); //твоя задача отловить это дерьмо
+        console.log(test_base);
+    }
+    catch(e){
         res.status(500).json({massage: "ouu shit"})
     }
-})
+});
 
 
 
-// /api/auth/login
-router.post(
-    '/login',
-    [
-        check('email', 'email incorect').normalizeEmail().isEmail(),
-        check('password', 'password').exists()
-    ],
-    async (req, res) => {
-    try{
-        const errors = validationResult(req)     
-        
-        if (!errors.isEmpty()){
-            return res.status(400).json({
-                errors: errors.array(),
-                massage: 'you idiot'
-            })
+// /api/login
+
+router.post('/login',async (req, res) => {
+
+        res.send("expectation data");
+        console.log("start expectation data")
+        //const {email, password} = req.body
+        console.log(req.body.mail)
+        console.log(req.body.password)
+
+        //для теста можеш швырнуть полную ху*ту
+        console.log(req.body.json)
+        try{      
+
+            res.send("sacsess");
+
+        }catch(e){
+            res.status(500).json({massage: "ouu shit"})
+            
         }
-
-        const {email, password} = req.body
-
-        const user = await User.findOne({ email })
-
-        if (!user){
-            return res.status(400).json({massage: 'user undefane'})
-        }
-
-        const isMach = await bcrypt.compare(password, user.password)
-
-        if (!isMach){
-            return res.status(400).json({ massage: 'password undefane'})
-        }
-
-        const token = jwt.sign(
-            { userId: user.id},
-            config.get('jwtSecret'),
-            { expiresIn: '1h' }
-        )
-
-        res.json({token, userId: user.id })
-
-    }catch(e){
-        res.status(500).json({massage: "ouu shit"})
-        
-    }
     
-})
+});
 
 
 module.exports = router
